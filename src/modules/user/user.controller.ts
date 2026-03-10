@@ -1,11 +1,25 @@
 ﻿import { Request, Response, NextFunction } from 'express';
 import { userService } from './user.service';
 import { UserRole } from '../../constants/roles';
+import { auditService } from '../audit/audit.service';
 
 
 export const createDoctor = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const user = await userService.createUser(req.body, UserRole.DOCTOR);
+
+        // Log doctor user creation
+        await auditService.log({
+            userId: (req as any).user?.userId,
+            role: (req as any).user?.role,
+            action: 'USER_CREATE_DOCTOR',
+            entity: 'User',
+            entityId: user._id.toString(),
+            description: `Doctor account created for ${user.email}`,
+            ip: req.ip,
+            userAgent: req.get('user-agent')
+        });
+
         res.status(201).json({
             success: true,
             message: 'Doctor account created successfully',
@@ -17,13 +31,26 @@ export const createDoctor = async (req: Request, res: Response, next: NextFuncti
             }
         });
     } catch (error: any) {
-        res.status(400).json({ success: false, message: error.message }); 
+        res.status(400).json({ success: false, message: error.message });
     }
 };
 
 export const createReceptionist = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const user = await userService.createUser(req.body, UserRole.RECEPTIONIST);
+
+        // Log receptionist creation
+        await auditService.log({
+            userId: (req as any).user?.userId,
+            role: (req as any).user?.role,
+            action: 'USER_CREATE_RECEPTIONIST',
+            entity: 'User',
+            entityId: user._id.toString(),
+            description: `Receptionist account created for ${user.email}`,
+            ip: req.ip,
+            userAgent: req.get('user-agent')
+        });
+
         res.status(201).json({
             success: true,
             message: 'Receptionist account created successfully',
@@ -35,7 +62,7 @@ export const createReceptionist = async (req: Request, res: Response, next: Next
             }
         });
     } catch (error: any) {
-        res.status(400).json({ success: false, message: error.message }); 
+        res.status(400).json({ success: false, message: error.message });
     }
 };
 
