@@ -1,9 +1,19 @@
 import { Router } from 'express';
-import { searchPatients } from './patient.controller';
+import {
+    searchPatients,
+    createPatient,
+    getPatients,
+    getPatientById
+} from './patient.controller';
 import { authMiddleware } from '../../middlewares/auth.middleware';
 
 const router = Router();
 
-router.get('/search', authMiddleware, searchPatients);
+router.use(authMiddleware);
+
+router.get('/search', searchPatients);
+router.get('/', getPatients);
+router.post('/', createPatient);
+router.get('/:id', getPatientById);
 
 export default router;

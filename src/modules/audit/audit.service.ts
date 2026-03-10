@@ -20,7 +20,7 @@ export const auditService = {
                 timestamp: new Date()
             });
             await auditEntry.save();
-        } catch (error) {git 
+        } catch (error) {
             console.error('Audit Log Error:', error);
         }
     }

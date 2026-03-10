@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import {
     createDoctor,
+    getMyDoctorProfile,
     getDoctors,
     getDoctorById,
     updateDoctor,
@@ -14,6 +15,7 @@ const router = Router();
 
 router.use(authMiddleware);
 router.get('/', getDoctors);
+router.get('/me', getMyDoctorProfile);
 router.get('/:id', getDoctorById);
 
 /**

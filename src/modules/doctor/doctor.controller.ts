@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { doctorService } from './doctor.service';
+import { Doctor } from './doctor.model';
 
 
 export const createDoctor = async (req: Request, res: Response, next: NextFunction) => {
@@ -13,6 +14,22 @@ export const createDoctor = async (req: Request, res: Response, next: NextFuncti
         });
     } catch (error: any) {
         res.status(400).json({ success: false, message: error.message });
+    }
+};
+
+
+export const getMyDoctorProfile = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const userId = (req as any).user?.userId;   // JWT TokenPayload uses 'userId', not '_id'
+        const doctor = await Doctor.findOne({ user: userId })
+            .populate('user', 'name email phone')
+            .lean();
+        if (!doctor) {
+            return res.status(404).json({ success: false, message: 'Doctor profile not found for this user' });
+        }
+        res.status(200).json({ success: true, data: doctor });
+    } catch (error: any) {
+        res.status(500).json({ success: false, message: error.message });
     }
 };
 
