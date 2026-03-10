@@ -1,11 +1,13 @@
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import { UserRole } from '../modules/user/user.model';
 
 dotenv.config();
 
-const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET || 'access_secret';
-const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || 'refresh_secret';
+const ACCESS_SECRET = process.env.JWT_ACCESS_SECRET || 'access_secret';
+const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'refresh_secret';
+const ACCESS_EXPIRY = process.env.ACCESS_TOKEN_EXPIRY || '15m';
+const REFRESH_EXPIRY = process.env.REFRESH_TOKEN_EXPIRY || '7d';
 
 export interface TokenPayload {
     userId: string;
