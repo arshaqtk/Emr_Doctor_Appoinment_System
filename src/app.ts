@@ -9,6 +9,7 @@ import userRoutes from './modules/user/user.routes';
 import doctorRoutes from './modules/doctor/doctor.routes';
 import appointmentRoutes from './modules/appointment/appointment.routes';
 import slotRoutes from './modules/slots/slot.routes';
+import patientRoutes from './modules/patient/patient.routes';
 import morgan from 'morgan';
 dotenv.config();
 
@@ -36,6 +37,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/doctors', doctorRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/slots', slotRoutes);
+app.use('/api/patients', patientRoutes);
 
 // Error Handling Middleware
 app.use(errorHandler);
