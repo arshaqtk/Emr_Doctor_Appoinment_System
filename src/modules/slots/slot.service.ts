@@ -1,68 +1,57 @@
 import { Doctor } from '../doctor/doctor.model';
 import { Appointment } from '../appointment/appointment.model';
+import { AppointmentStatus } from '../appointment/appointment.model';
 
-export interface Slot {
-    time: string;
-    status: 'available' | 'booked';
-}
-
-export const slotService = {
-    generateSlots: async (doctorId: string, date: string): Promise<Slot[]> => {
+class SlotService {
+    async generateSlots(doctorId: string, date: string) {
         const doctor = await Doctor.findById(doctorId);
-        if (!doctor) {
-            throw new Error('Doctor not found');
+        if (!doctor || !doctor.isActive) {
+            throw new Error('Doctor not found or inactive');
         }
 
-        const requestedDate = new Date(date);
-        const dayOfWeek = requestedDate.toLocaleDateString('en-US', { weekday: 'long' });
-
-        if (!doctor.availableDays.includes(dayOfWeek)) {
+        // Check if doctor works on this day
+        const dayName = new Date(date).toLocaleString('en-US', { weekday: 'long' });
+        if (!doctor.availableDays.includes(dayName)) {
             return [];
         }
 
-        const slots: Slot[] = [];
-        const { start, end } = doctor.workingHours;
+        const slots = [];
+        const startMinutes = this.timeToMinutes(doctor.workingHours.start);
+        const endMinutes = this.timeToMinutes(doctor.workingHours.end);
         const duration = doctor.slotDuration;
 
-        const startTime = parseTime(start);
-        const endTime = parseTime(end);
-
-        const breakTimes = doctor.breakTimes.map(bt => ({
-            start: parseTime(bt.start),
-            end: parseTime(bt.end)
-        }));
-
-        const today = new Date();
-        const isToday = requestedDate.toDateString() === today.toDateString();
-        const currentTime = today.getHours() * 60 + today.getMinutes();
-
-        // Fetch appointments for this doctor on this date
-        const startOfDay = new Date(date);
-        startOfDay.setHours(0, 0, 0, 0);
-        const endOfDay = new Date(date);
-        endOfDay.setHours(23, 59, 59, 999);
-
-        const appointments = await Appointment.find({
+        // Get booked appointments for this doctor and date
+        const bookedAppointments = await Appointment.find({
             doctor: doctorId,
-            date: { $gte: startOfDay, $lte: endOfDay },
-            status: { $ne: 'cancelled' }
-        });
+            date,
+            status: { $ne: AppointmentStatus.CANCELLED }
+        }).select('time');
 
-        const bookedSlots = appointments.map(app => app.timeSlot);
+        const bookedTimes = bookedAppointments.map(app => app.time);
 
-        let current = startTime;
-        while (current + duration <= endTime) {
-            const timeStr = formatTime(current);
+        let current = startMinutes;
+        const now = new Date();
+        const isToday = now.toISOString().split('T')[0] === date;
+        const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
-            
-            const isInBreak = breakTimes.some(bt => current >= bt.start && current < bt.end);
+        while (current + duration <= endMinutes) {
+            const timeStr = this.minutesToTime(current);
 
-            if (!isInBreak) {
-               
-                if (!isToday || current > currentTime) {
-                    const status = bookedSlots.includes(timeStr) ? 'booked' : 'available';
-                    slots.push({ time: timeStr, status });
-                }
+            // Check if inside break times
+            const isBreak = doctor.breakTimes.some(b => {
+                const bStart = this.timeToMinutes(b.start);
+                const bEnd = this.timeToMinutes(b.end);
+                return current >= bStart && current < bEnd;
+            });
+
+            // Check if in the past (if booking for today)
+            const isPast = isToday && current < currentMinutes;
+
+            if (!isBreak && !isPast) {
+                slots.push({
+                    time: timeStr,
+                    isBooked: bookedTimes.includes(timeStr)
+                });
             }
 
             current += duration;
@@ -70,15 +59,17 @@ export const slotService = {
 
         return slots;
     }
-};
 
-function parseTime(timeStr: string): number {
-    const [hours, minutes] = timeStr.split(':').map(Number);
-    return hours * 60 + minutes;
+    private timeToMinutes(time: string): number {
+        const [hours, minutes] = time.split(':').map(Number);
+        return hours * 60 + minutes;
+    }
+
+    private minutesToTime(minutes: number): string {
+        const h = Math.floor(minutes / 60);
+        const m = minutes % 60;
+        return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+    }
 }
 
-function formatTime(totalMinutes: number): string {
-    const hours = Math.floor(totalMinutes / 60);
-    const minutes = totalMinutes % 60;
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-}
+export const slotService = new SlotService();

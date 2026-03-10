@@ -14,17 +14,24 @@ export const doctorService = {
     },
 
 
-    getDoctors: async (department?: string) => {
+    getDoctors: async (department?: string, page: number = 1, limit: number = 10) => {
         const query: any = { isActive: true };
 
         if (department) {
             query.department = { $regex: new RegExp(`^${department}$`, 'i') };
         }
 
-        return await Doctor.find(query)
-            .populate('user', 'name email phone')
-            .lean()
-            .exec();
+        const [data, total] = await Promise.all([
+            Doctor.find(query)
+                .populate('user', 'name email phone')
+                .skip((page - 1) * limit)
+                .limit(limit)
+                .lean()
+                .exec(),
+            Doctor.countDocuments(query)
+        ]);
+
+        return { data, total, page, limit };
     },
 
 

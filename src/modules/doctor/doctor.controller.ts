@@ -20,12 +20,13 @@ export const createDoctor = async (req: Request, res: Response, next: NextFuncti
 export const getDoctors = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const department = req.query.department as string;
-        const doctors = await doctorService.getDoctors(department);
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 10;
+        const result = await doctorService.getDoctors(department, page, limit);
 
         res.status(200).json({
             success: true,
-            count: doctors.length,
-            data: doctors
+            ...result
         });
     } catch (error: any) {
         next(error);
