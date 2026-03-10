@@ -11,9 +11,16 @@ import appointmentRoutes from './modules/appointment/appointment.routes';
 import slotRoutes from './modules/slots/slot.routes';
 import patientRoutes from './modules/patient/patient.routes';
 import morgan from 'morgan';
+import path from 'path';
 dotenv.config();
 
 const app: Application = express();
+
+app.use(express.static(path.join(__dirname, '../public')));
+
+app.get('/robots.txt', (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/robots.txt'));
+});
 
 // Global Middlewares
 app.use(cors());
