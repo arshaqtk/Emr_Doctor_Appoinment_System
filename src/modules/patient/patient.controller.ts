@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { patientService } from './patient.service';
+import { auditService } from '../audit/audit.service';
 
 export const searchPatients = async (req: Request, res: Response) => {
     try {
@@ -18,6 +19,19 @@ export const searchPatients = async (req: Request, res: Response) => {
 export const createPatient = async (req: Request, res: Response) => {
     try {
         const patient = await patientService.createPatient(req.body);
+
+        // Log patient creation
+        await auditService.log({
+            userId: (req as any).user?.userId,
+            role: (req as any).user?.role,
+            action: 'PATIENT_CREATE',
+            entity: 'Patient',
+            entityId: patient._id.toString(),
+            description: `Registered patient ${patient.name} (${patient.patientId})`,
+            ip: req.ip,
+            userAgent: req.get('user-agent')
+        });
+
         res.status(201).json(patient);
     } catch (error: any) {
         res.status(400).json({ message: error.message });
