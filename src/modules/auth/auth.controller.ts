@@ -15,15 +15,15 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 
         res.cookie('accessToken', data.accessToken, {
             httpOnly: true,
-            secure: process.env.COOKIE_SECURE === 'true' || process.env.NODE_ENV === 'production',
-            sameSite: (process.env.COOKIE_SAME_SITE as 'strict' | 'lax' | 'none') || 'lax',
+            secure: true, // Always true for cross-site cookies
+            sameSite: 'none', // Required for cross-site cookies between Render and Vercel
             maxAge: Number(process.env.ACCESS_COOKIE_MAXAGE) || 15 * 60 * 1000
         });
 
         res.cookie('refreshToken', data.refreshToken, {
             httpOnly: true,
-            secure: process.env.COOKIE_SECURE === 'true' || process.env.NODE_ENV === 'production',
-            sameSite: (process.env.COOKIE_SAME_SITE as 'strict' | 'lax' | 'none') || 'lax',
+            secure: true, // Always true for cross-site cookies
+            sameSite: 'none', // Required for cross-site cookies between Render and Vercel
             maxAge: Number(process.env.REFRESH_COOKIE_MAXAGE) || 7 * 24 * 60 * 60 * 1000
         });
 
@@ -75,8 +75,8 @@ export const refresh = async (req: Request, res: Response, next: NextFunction) =
 
         res.cookie('accessToken', data.accessToken, {
             httpOnly: true,
-            secure: process.env.COOKIE_SECURE === 'true' || process.env.NODE_ENV === 'production',
-            sameSite: (process.env.COOKIE_SAME_SITE as 'strict' | 'lax' | 'none') || 'lax',
+            secure: true,
+            sameSite: 'none',
             maxAge: Number(process.env.ACCESS_COOKIE_MAXAGE) || 15 * 60 * 1000
         });
 
@@ -101,8 +101,16 @@ export const logout = async (req: Request, res: Response, next: NextFunction) =>
         }
 
         // Clear cookies
-        res.clearCookie('accessToken');
-        res.clearCookie('refreshToken');
+        res.clearCookie('accessToken', {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'none'
+        });
+        res.clearCookie('refreshToken', {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'none'
+        });
 
         // Log logout
         if (req.user) {

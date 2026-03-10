@@ -23,9 +23,30 @@ app.get('/robots.txt', (req, res) => {
 });
 
 // Global Middlewares
+const allowedOrigins = [
+    process.env.CLIENT_URL?.replace(/"/g, ''),
+    'https://emr-doctor-appoinment-system.vercel.app',
+    'http://localhost:5173'
+].filter(Boolean) as string[];
+
 app.use(cors({
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    origin: (origin, callback) => {
+        if (!origin) return callback(null, true);
+
+        // Remove trailing slashes for comparison
+        const normalizedOrigin = origin.replace(/\/$/, '');
+        const isAllowed = allowedOrigins.some(o => o.replace(/\/$/, '') === normalizedOrigin);
+
+        if (isAllowed) {
+            callback(null, true);
+        } else {
+            console.warn(`CORS blocked for origin: ${origin}`);
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Cookie']
 }));
 app.use(cookieParser());
 app.use(express.json());
