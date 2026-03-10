@@ -3,10 +3,6 @@ import { Schema, model, Document, Types } from 'mongoose';
 export enum AppointmentStatus {
     BOOKED = 'BOOKED',
     ARRIVED = 'ARRIVED',
-    IN_CONSULTATION = 'IN_CONSULTATION',
-    COMPLETED = 'COMPLETED',
-    CANCELLED = 'CANCELLED',
-    NO_SHOW = 'NO_SHOW'
 }
 
 export interface IAppointment extends Document {
@@ -40,7 +36,7 @@ const appointmentSchema = new Schema<IAppointment>({
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true }
 }, { timestamps: true });
 
-// Compound unique index for double booking prevention
+
 appointmentSchema.index({ doctor: 1, date: 1, time: 1 }, { unique: true });
 
 export const Appointment = model<IAppointment>('Appointment', appointmentSchema);

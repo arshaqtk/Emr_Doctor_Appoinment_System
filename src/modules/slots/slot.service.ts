@@ -1,6 +1,5 @@
 import { Doctor } from '../doctor/doctor.model';
 import { Appointment } from '../appointment/appointment.model';
-import { AppointmentStatus } from '../appointment/appointment.model';
 
 class SlotService {
     async generateSlots(doctorId: string, date: string) {
@@ -9,8 +8,8 @@ class SlotService {
             throw new Error('Doctor not found or inactive');
         }
 
-        // Check if doctor works on this day
-        const dayName = new Date(date).toLocaleString('en-US', { weekday: 'long' });
+
+        const dayName = new Date(date + 'T00:00:00').toLocaleString('en-US', { weekday: 'long' });
         if (!doctor.availableDays.includes(dayName)) {
             return [];
         }
@@ -20,37 +19,37 @@ class SlotService {
         const endMinutes = this.timeToMinutes(doctor.workingHours.end);
         const duration = doctor.slotDuration;
 
-        // Get booked appointments for this doctor and date
+       
         const bookedAppointments = await Appointment.find({
             doctor: doctorId,
-            date,
-            status: { $ne: AppointmentStatus.CANCELLED }
+            date
         }).select('time');
 
         const bookedTimes = bookedAppointments.map(app => app.time);
 
         let current = startMinutes;
         const now = new Date();
-        const isToday = now.toISOString().split('T')[0] === date;
+       
+        const localDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+        const isToday = localDate === date;
         const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
         while (current + duration <= endMinutes) {
             const timeStr = this.minutesToTime(current);
 
-            // Check if inside break times
             const isBreak = doctor.breakTimes.some(b => {
                 const bStart = this.timeToMinutes(b.start);
                 const bEnd = this.timeToMinutes(b.end);
                 return current >= bStart && current < bEnd;
             });
 
-            // Check if in the past (if booking for today)
             const isPast = isToday && current < currentMinutes;
 
             if (!isBreak && !isPast) {
                 slots.push({
                     time: timeStr,
-                    isBooked: bookedTimes.includes(timeStr)
+                    isBooked: bookedTimes.includes(timeStr),
+                    status: bookedTimes.includes(timeStr) ? 'booked' : 'available'
                 });
             }
 

@@ -3,7 +3,6 @@ import { ClientSession } from 'mongoose';
 
 export const patientService = {
     createPatient: async (patientData: Partial<IPatient>, session?: ClientSession) => {
-       
         const count = await Patient.countDocuments().session(session || null);
         const patientId = `PAT-${1000 + count + 1}`;
 
@@ -13,6 +12,29 @@ export const patientService = {
         });
 
         return await patient.save({ session });
+    },
+
+    getPatients: async (query?: string, page = 1, limit = 20) => {
+        const filter: any = query
+            ? {
+                $or: [
+                    { name: new RegExp(query, 'i') },
+                    { mobile: new RegExp(query, 'i') },
+                    { patientId: new RegExp(query, 'i') }
+                ]
+            }
+            : {};
+
+        const [data, total] = await Promise.all([
+            Patient.find(filter)
+                .sort({ createdAt: -1 })
+                .skip((page - 1) * limit)
+                .limit(limit)
+                .lean(),
+            Patient.countDocuments(filter)
+        ]);
+
+        return { data, total, page, limit };
     },
 
     searchPatients: async (query: string) => {
