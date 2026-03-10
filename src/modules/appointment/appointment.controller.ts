@@ -9,14 +9,14 @@ export const createAppointment = async (req: Request, res: Response) => {
 
         // Log appointment creation
         await auditService.log({
-            userId: createdBy,
-            role: (req as any).user?.role,
+            userId: String(createdBy),
+            role: String((req as any).user?.role),
             action: 'APPOINTMENT_CREATE',
             entity: 'Appointment',
             entityId: appointment._id.toString(),
             description: `Appointment created for patient date ${appointment.date} ${appointment.time}`,
-            ip: req.ip,
-            userAgent: req.get('user-agent')
+            ip: req.ip as string | undefined,
+            userAgent: req.get('user-agent') as string | undefined
         });
 
         res.status(201).json(appointment);
@@ -42,14 +42,14 @@ export const updateAppointment = async (req: Request, res: Response) => {
 
         // Log update
         await auditService.log({
-            userId: (req as any).user?.userId,
-            role: (req as any).user?.role,
+            userId: String((req as any).user?.userId),
+            role: String((req as any).user?.role),
             action: 'APPOINTMENT_UPDATE',
             entity: 'Appointment',
             entityId: appointment._id.toString(),
             description: `Appointment updated for ID: ${req.params.id}`,
-            ip: req.ip,
-            userAgent: req.get('user-agent')
+            ip: req.ip as string | undefined,
+            userAgent: req.get('user-agent') as string | undefined
         });
 
         res.status(200).json(appointment);
@@ -65,14 +65,14 @@ export const deleteAppointment = async (req: Request, res: Response) => {
 
         // Log deletion
         await auditService.log({
-            userId: (req as any).user?.userId,
-            role: (req as any).user?.role,
+            userId: String((req as any).user?.userId),
+            role: String((req as any).user?.role),
             action: 'APPOINTMENT_DELETE',
             entity: 'Appointment',
-            entityId: req.params.id,
-            description: `Appointment cancelled/deleted`,
-            ip: req.ip,
-            userAgent: req.get('user-agent')
+            entityId: appointment._id.toString(),
+            description: `Appointment cancelled/deleted: ${req.params.id}`,
+            ip: req.ip as string | undefined,
+            userAgent: req.get('user-agent') as string | undefined
         });
 
         res.status(200).json({ message: 'Appointment cancelled', appointment });
