@@ -15,11 +15,11 @@ export interface TokenPayload {
 }
 
 export const generateAccessToken = (payload: TokenPayload): string => {
-    return jwt.sign(payload, ACCESS_SECRET as jwt.Secret, { expiresIn: ACCESS_EXPIRY });
+    return jwt.sign(payload, ACCESS_SECRET as jwt.Secret, { expiresIn: ACCESS_EXPIRY as SignOptions['expiresIn'] });
 };
 
 export const generateRefreshToken = (payload: TokenPayload): string => {
-    return jwt.sign(payload, REFRESH_SECRET as jwt.Secret, { expiresIn: REFRESH_EXPIRY });
+    return jwt.sign(payload, REFRESH_SECRET as jwt.Secret, { expiresIn: REFRESH_EXPIRY as SignOptions['expiresIn'] });
 };
 
 export const verifyAccessToken = (token: string): TokenPayload | null => {
