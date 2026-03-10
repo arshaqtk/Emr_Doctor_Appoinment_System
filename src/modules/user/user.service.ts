@@ -27,7 +27,7 @@ export const userService = {
     },
 
     getAllUsers: async (): Promise<IUser[]> => {
-        return await User.find().select('-password').sort({ createdAt: -1 });
+        return await User.find({role: {$ne: UserRole.SUPER_ADMIN}}).select('-password').sort({ createdAt: -1 });
     },
 
 

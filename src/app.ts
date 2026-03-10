@@ -28,7 +28,6 @@ app.use('/api/auth/refresh', authLimiter);
 app.get('/health', (req: Request, res: Response) => {
     res.status(200).json({ status: 'UP', message: 'EMR API is running' });
 });
-
 // Route
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);

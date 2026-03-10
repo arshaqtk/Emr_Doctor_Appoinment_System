@@ -10,8 +10,8 @@ const ACCESS_EXPIRY = process.env.ACCESS_TOKEN_EXPIRY || '15m';
 const REFRESH_EXPIRY = process.env.REFRESH_TOKEN_EXPIRY || '7d';
 
 export interface TokenPayload {
-    userId: string;
-    role: UserRole;
+    userId: string; 
+    role: UserRole; 
 }
 
 export const generateAccessToken = (payload: TokenPayload): string => {
