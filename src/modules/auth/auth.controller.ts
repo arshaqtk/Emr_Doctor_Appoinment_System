@@ -14,16 +14,16 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 
         res.cookie('accessToken', data.accessToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
-            maxAge: 15 * 60 * 1000 // 15 minutes
+            secure: process.env.COOKIE_SECURE === 'true' || process.env.NODE_ENV === 'production',
+            sameSite: (process.env.COOKIE_SAME_SITE as 'strict' | 'lax' | 'none') || 'lax',
+            maxAge: Number(process.env.ACCESS_COOKIE_MAXAGE) || 15 * 60 * 1000
         });
 
         res.cookie('refreshToken', data.refreshToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
-            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+            secure: process.env.COOKIE_SECURE === 'true' || process.env.NODE_ENV === 'production',
+            sameSite: (process.env.COOKIE_SAME_SITE as 'strict' | 'lax' | 'none') || 'lax',
+            maxAge: Number(process.env.REFRESH_COOKIE_MAXAGE) || 7 * 24 * 60 * 60 * 1000
         });
 
         res.status(200).json({
@@ -49,9 +49,9 @@ export const refresh = async (req: Request, res: Response, next: NextFunction) =
 
         res.cookie('accessToken', data.accessToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
-            maxAge: 15 * 60 * 1000
+            secure: process.env.COOKIE_SECURE === 'true' || process.env.NODE_ENV === 'production',
+            sameSite: (process.env.COOKIE_SAME_SITE as 'strict' | 'lax' | 'none') || 'lax',
+            maxAge: Number(process.env.ACCESS_COOKIE_MAXAGE) || 15 * 60 * 1000
         });
 
         res.status(200).json({
