@@ -8,7 +8,8 @@ import authRoutes from './modules/auth/auth.routes';
 import userRoutes from './modules/user/user.routes';
 import doctorRoutes from './modules/doctor/doctor.routes';
 import appointmentRoutes from './modules/appointment/appointment.routes';
-
+import slotRoutes from './modules/slots/slot.routes';
+import morgan from 'morgan';
 dotenv.config();
 
 const app: Application = express();
@@ -23,7 +24,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/', globalLimiter);
 app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/refresh', authLimiter);
-
+app.use(morgan("dev"))
 
 app.get('/health', (req: Request, res: Response) => {
     res.status(200).json({ status: 'UP', message: 'EMR API is running' });
@@ -34,6 +35,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/doctors', doctorRoutes);
 app.use('/api/appointments', appointmentRoutes);
+app.use('/api/slots', slotRoutes);
 
 // Error Handling Middleware
 app.use(errorHandler);

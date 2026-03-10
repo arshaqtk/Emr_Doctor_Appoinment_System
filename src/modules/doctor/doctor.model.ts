@@ -12,6 +12,7 @@ export interface IDoctor extends Document {
         start: string;
         end: string;
     };
+    availableDays: string[];
     breakTimes: Array<{
         start: string;
         end: string;
