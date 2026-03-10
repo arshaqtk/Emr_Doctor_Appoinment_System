@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { verifyAccessToken } from '../utils/jwt';
 
+
 export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
     const accessToken = req.cookies.accessToken;
 
@@ -16,7 +17,7 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction) 
     if (!decoded) {
         return res.status(401).json({
             success: false,
-            message: 'Invalid or expired access token.'
+            message: 'Invalid or expired access token. Access Denied.'
         });
     }
 
