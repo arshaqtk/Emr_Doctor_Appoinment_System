@@ -1,26 +1,20 @@
 import { Request, Response, NextFunction } from 'express';
-import { UserRole } from '../modules/user/user.model';
+import { UserRole } from '../constants/roles';
 
-export const roleMiddleware = (allowedRoles: UserRole[]) => {
+
+export const authorizeRoles = (...roles: UserRole[]) => {
     return (req: Request, res: Response, next: NextFunction) => {
         if (!req.user) {
             return res.status(401).json({
                 success: false,
-                message: 'Unauthorized: User not authenticated'
+                message: 'Unauthorized. User context missing.'
             });
         }
 
-        const { role } = req.user;
-
-        // Super admins have access to all system pages/routes
-        if (role === UserRole.SUPER_ADMIN) {
-            return next();
-        }
-
-        if (!allowedRoles.includes(role)) {
+        if (!roles.includes(req.user.role)) {
             return res.status(403).json({
                 success: false,
-                message: 'Forbidden: Insufficient permissions for this role'
+                message: `Forbidden. Role '${req.user.role}' does not have access to this resource.`
             });
         }
 
