@@ -3,7 +3,7 @@ import { Appointment, IAppointment, AppointmentStatus } from './appointment.mode
 import { Doctor } from '../doctor/doctor.model';
 import { Patient } from '../patient/patient.model';
 import { patientService } from '../patient/patient.service';
-import { slotService } from '../slots/slot.service';
+import { generateSlots } from '../slots/slot.service';
 
 export const appointmentService = {
     createAppointment: async (data: any, createdBy: string) => {
@@ -18,7 +18,7 @@ export const appointmentService = {
                 throw new Error('Doctor not found or inactive');
             }
 
-            const availableSlots = await slotService.generateSlots(doctorId, date);
+            const availableSlots = await generateSlots(doctorId, date);
             const requestedSlot = availableSlots.find(s => s.time === time);
 
             if (!requestedSlot) {

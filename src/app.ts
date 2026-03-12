@@ -15,6 +15,9 @@ dotenv.config();
 
 const app: Application = express();
 
+// Trust proxy for secure cookies behind Vercel/Render Load Balancers
+app.set('trust proxy', 1);
+
 // Global Middlewares
 app.use(cors({
     origin: process.env.CLIENT_URL || 'http://localhost:5173',

@@ -11,9 +11,7 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction) 
             message: 'Access token missing. Please log in.'
         });
     }
-
     const decoded = verifyAccessToken(accessToken);
-
     if (!decoded) {
         return res.status(401).json({
             success: false,
