@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { slotService } from './slot.service';
+import { generateSlots } from './slot.service';
 
 export const getSlots = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -12,7 +12,7 @@ export const getSlots = async (req: Request, res: Response, next: NextFunction) 
             });
         }
 
-        const slots = await slotService.generateSlots(doctorId as string, date as string);
+        const slots = await generateSlots(doctorId as string, date as string);
 
         res.status(200).json({
             success: true,
